@@ -40,7 +40,6 @@ public class PlayerController : MonoBehaviour
 
         //if(isOwner){
         cinemachineCamera = GameObject.Find("CinemachineCamera").GetComponent<CinemachineCamera>();
-        //cinemachineCamera.LookAt = transform;
         cinemachineCamera.Follow = transform;
         //}
     }
@@ -87,14 +86,10 @@ public class PlayerController : MonoBehaviour
         if (horM != 0)
         {
             currentTransform.Rotate(0.0f,horM * (sensibility * 100) * Time.deltaTime , 0.0f);
-            //Vector2 rotation = cinemachineCamera.transform.localEulerAngles;
             rotation.y = currentTransform.rotation.eulerAngles.y;
-            //rotation.y = (rotation.y + horM * (sensibility * 100) * Time.deltaTime + 360) % 360;
-            //cinemachineCamera.transform.Rotate(0.0f, horM * (sensibility * 100) * Time.deltaTime, 0.0f);
         }
         if (verM != 0)
         {
-            //Vector2 rotation = cinemachineCamera.transform.localEulerAngles;
             rotation.x = (rotation.x - verM * (sensibility * 100) * Time.deltaTime + 360) % 360;
             if (rotation.x > 80 && rotation.x < 180)
             {
@@ -104,8 +99,6 @@ public class PlayerController : MonoBehaviour
             {
                 rotation.x = 280;
             }
-            //cinemachineCamera.transform.localEulerAngles = rotation;
-
         }
         cinemachineCamera.transform.localEulerAngles = rotation;
     }
