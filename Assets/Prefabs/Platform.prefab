@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 3630058472776662093}
   - component: {fileID: 3841783547070320989}
   - component: {fileID: 4445081230364755900}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Plane
   m_TagString: Suelo
   m_Icon: {fileID: 0}
@@ -29,7 +29,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.08, y: 0.08, z: 0.08}
+  m_LocalScale: {x: 0.095, y: 0.095, z: 0.095}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 5712154337498769489}
