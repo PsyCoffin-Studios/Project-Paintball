@@ -20,7 +20,6 @@ public class PlayerFeet : MonoBehaviour
     //comprobar si el jugador está en el suelo para saltar
     void OnTriggerEnter(Collider collision)
     {
-        Debug.Log("ashsjkdasg");
         if (collision.gameObject.CompareTag("Suelo"))
         {
             playerController.SetJumping(false);
@@ -29,7 +28,6 @@ public class PlayerFeet : MonoBehaviour
     //comprobar que el jugador ha saltado o está cayendo de alguna superficie para no poder saltar en el aire
     void OnTriggerExit(Collider collision)
     {
-        Debug.Log("ashsjkdasg    fdsfsdfsd");
         if (collision.gameObject.CompareTag("Suelo"))
         {
             playerController.SetJumping(true);
