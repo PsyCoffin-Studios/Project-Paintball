@@ -30,6 +30,8 @@ public class PlayerController : MonoBehaviour
     private Vector3 crouchedScale = new Vector3(1, 0.6f, 1); //escala agachado (para el collider)
     private Vector3 crouchedCameraOffset = new Vector3(0, 0.48f, 0.3f); //offset de la cámara agachado (posición aproximada de la cabeza)
 
+    private
+
     void Start()
     {
         Cursor.visible = false;
@@ -113,42 +115,37 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    //comprobar si el jugador está en el suelo para saltar
-    void OnCollisionEnter(Collision collision)
+
+    public void SetJumping(bool a)
     {
-        if (collision.gameObject.CompareTag("Suelo"))
-        {
-            jumping = false;
-        }
+        jumping = a;
     }
-    //comprobar que el jugador ha saltado o está cayendo de alguna superficie para no poder saltar en el aire
-    void OnCollisionExit(Collision collision)
+
+    public bool GetJumping()
     {
-        if (collision.gameObject.CompareTag("Suelo"))
-        {
-            jumping = true;
-        }
+        return jumping;
     }
+
     #endregion
 
     #region ONCROUCH
     public void EnterCrouch() {
-        if (!jumping)
-        {
+        //if (!jumping)
+        //{
             crouched = true;
             //aqui cambiamos la escala de la capsula (principalmente para que el collider se haga más bajo),
             //cuando tengamos modelos no deberia ser así a no ser que el modelo y el objeto jugador se manejen por separado
             transform.localScale = crouchedScale;
-            transform.localPosition = new Vector3(transform.localPosition.x, -0.4f, transform.localPosition.z);
+            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
             cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = crouchedCameraOffset;
-        }
+        //}
     }
     public void ExitCrouch()
     {
             crouched = false;
             //volvemos a cambiar la escala
             transform.localScale = standingScale;
-            transform.localPosition = new Vector3(transform.localPosition.x, 0f, transform.localPosition.z);
+            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + 0.4f, transform.localPosition.z);
             cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = standingCameraOffset;
     }
     #endregion
