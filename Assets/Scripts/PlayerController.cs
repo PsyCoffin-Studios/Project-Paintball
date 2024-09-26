@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
     public CinemachineCamera cinemachineCamera; //referencia a la camara
 
@@ -30,7 +31,6 @@ public class PlayerController : MonoBehaviour
     private Vector3 crouchedScale = new Vector3(1, 0.6f, 1); //escala agachado (para el collider)
     private Vector3 crouchedCameraOffset = new Vector3(0, 0.48f, 0.3f); //offset de la cámara agachado (posición aproximada de la cabeza)
 
-    private
 
     void Start()
     {
@@ -40,20 +40,21 @@ public class PlayerController : MonoBehaviour
         currentTransform = transform;
         rb = GetComponent<Rigidbody>();
 
-        //if(isOwner){
-        cinemachineCamera = GameObject.Find("CinemachineCamera").GetComponent<CinemachineCamera>();
-        cinemachineCamera.Follow = transform;
-        //}
+        if (IsOwner)
+        {
+            transform.parent.GetComponent<PlayerInput>().enabled = true;
+            cinemachineCamera = GameObject.Find("CinemachineCamera").GetComponent<CinemachineCamera>();
+            cinemachineCamera.Follow = transform;
+        }
     }
     void Update()
     {
-        //if(!isOwner){return;}
     }
 
     public void FixedUpdate()
     {
-        UpdateMovement();
-        UpdateMouseLook();
+            UpdateMovement();
+            UpdateMouseLook();
     }
 
     #region ONMOVE
@@ -84,25 +85,28 @@ public class PlayerController : MonoBehaviour
     #region ONMOUSE
     private void UpdateMouseLook()
     {
-        Vector2 rotation = cinemachineCamera.transform.localEulerAngles;
-        if (horM != 0)
+        if (IsOwner)
         {
-            currentTransform.Rotate(0.0f,horM * (sensibility * 100) * Time.deltaTime , 0.0f);
-            rotation.y = currentTransform.rotation.eulerAngles.y;
-        }
-        if (verM != 0)
-        {
-            rotation.x = (rotation.x - verM * (sensibility * 100) * Time.deltaTime + 360) % 360;
-            if (rotation.x > 80 && rotation.x < 180)
+            Vector2 rotation = cinemachineCamera.transform.localEulerAngles;
+            if (horM != 0)
             {
-                rotation.x = 80;
+                currentTransform.Rotate(0.0f, horM * (sensibility * 100) * Time.deltaTime, 0.0f);
+                rotation.y = currentTransform.rotation.eulerAngles.y;
             }
-            if (rotation.x < 280 && rotation.x > 180)
+            if (verM != 0)
             {
-                rotation.x = 280;
+                rotation.x = (rotation.x - verM * (sensibility * 100) * Time.deltaTime + 360) % 360;
+                if (rotation.x > 80 && rotation.x < 180)
+                {
+                    rotation.x = 80;
+                }
+                if (rotation.x < 280 && rotation.x > 180)
+                {
+                    rotation.x = 280;
+                }
             }
+            cinemachineCamera.transform.localEulerAngles = rotation;
         }
-        cinemachineCamera.transform.localEulerAngles = rotation;
     }
 
     #endregion
@@ -110,7 +114,14 @@ public class PlayerController : MonoBehaviour
     #region ONJUMP
     public void Saltar()
     {
-        if (!jumping) { 
+        SaltarServerRpc();
+    }
+
+    [ServerRpc]
+    public void SaltarServerRpc()
+    {
+        if (!jumping)
+        {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
     }
@@ -130,23 +141,35 @@ public class PlayerController : MonoBehaviour
 
     #region ONCROUCH
     public void EnterCrouch() {
-        //if (!jumping)
-        //{
-            crouched = true;
-            //aqui cambiamos la escala de la capsula (principalmente para que el collider se haga más bajo),
-            //cuando tengamos modelos no deberia ser así a no ser que el modelo y el objeto jugador se manejen por separado
-            transform.localScale = crouchedScale;
-            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
-            cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = crouchedCameraOffset;
-        //}
+        EnterCrouchServerRpc();
     }
     public void ExitCrouch()
     {
-            crouched = false;
-            //volvemos a cambiar la escala
-            transform.localScale = standingScale;
-            transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + 0.4f, transform.localPosition.z);
-            cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = standingCameraOffset;
+        ExitCrouchServerRpc();   
+    }
+
+    [ServerRpc]
+    public void EnterCrouchServerRpc()
+    {
+        //if (!jumping)
+        //{
+        crouched = true;
+        //aqui cambiamos la escala de la capsula (principalmente para que el collider se haga más bajo),
+        //cuando tengamos modelos no deberia ser así a no ser que el modelo y el objeto jugador se manejen por separado
+        transform.localScale = crouchedScale;
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
+        cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = crouchedCameraOffset;
+        //}   
+    }
+
+    [ServerRpc]
+    public void ExitCrouchServerRpc()
+    {
+        crouched = false;
+        //volvemos a cambiar la escala
+        transform.localScale = standingScale;
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + 0.4f, transform.localPosition.z);
+        cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = standingCameraOffset;
     }
     #endregion
 }

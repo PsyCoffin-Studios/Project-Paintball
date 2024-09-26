@@ -2,18 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Unity.Netcode;
+using Unity.Cinemachine;
 
-public class InputController : MonoBehaviour
+public class InputController : NetworkBehaviour
 {
     [SerializeField] private PlayerController body;
     
+
     void Start()
     {
-        //if(isOwner){
-        GetComponent<PlayerInput>().enabled = true;
-        //}
-
-        body = transform.GetChild(0).GetComponent<PlayerController>();
+        //body = transform.GetChild(0).GetComponent<PlayerController>();
     }
 
     // Update is called once per frame
@@ -24,8 +23,7 @@ public class InputController : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        body.hor = context.ReadValue<Vector2>().x;
-        body.ver = context.ReadValue<Vector2>().y;
+        OnMoveServerRpc(context.ReadValue<Vector2>());
     }
 
     public void OnJump(InputAction.CallbackContext context)
@@ -37,11 +35,25 @@ public class InputController : MonoBehaviour
     }
 
     public void OnMouseX(InputAction.CallbackContext context){
-        body.horM = context.ReadValue<float>();
+        OnMouseXServerRpc(context.ReadValue<float>());
     }
     public void OnMouseY(InputAction.CallbackContext context){
-        body.verM = context.ReadValue<float>();
+        
+        OnMouseYServerRpc(context.ReadValue<float>());
     }
+
+    [ServerRpc]
+    public void OnMouseXServerRpc(float input)
+    {
+        body.horM = input;
+    }
+
+    [ServerRpc]
+    public void OnMouseYServerRpc(float input)
+    {
+        body.verM = input;
+    }
+
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.performed)
@@ -52,5 +64,26 @@ public class InputController : MonoBehaviour
         {
             body.ExitCrouch();
         }
+    }
+
+
+    [ServerRpc]
+    public void OnMoveServerRpc(Vector2 input)
+    {
+        body.hor = input.x;
+        body.ver = input.y;
+    }
+
+    [ServerRpc]
+    public void OnJumpServerRpc()
+    {
+
+    }
+
+
+    [ServerRpc]
+    public void OnCrouchServerRpc()
+    {
+
     }
 }
