@@ -4,10 +4,12 @@ using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
+using Unity.VisualScripting;
 
 public class PlayerController : NetworkBehaviour
 {
     public CinemachineCamera cinemachineCamera; //referencia a la camara
+    [SerializeField] private GameObject playerHead; //referencia a la cabeza del jugador (para la lógica de la cámara y seguro es util para programar headshoots)
 
     private Transform currentTransform;
     private Rigidbody rb;
@@ -19,17 +21,19 @@ public class PlayerController : NetworkBehaviour
     private bool crouched = false; //booleano para indicar que esta agachado
 
     //variables de movimiento del input
-    public float hor; //movimiento horizontal
-    public float ver; //movimiento vertical
+    public float hor { get; set; } //movimiento horizontal
+    public float ver { get; set; } //movimiento vertical
 
-    public float horM; //movimiento horizontal DEL RATON
-    public float verM; //movimiento vertical DEL RATON
+    public float horM { get; set; } //movimiento horizontal DEL RATON
+    public float verM { get; set; } //movimiento vertical DEL RATON
 
-    private Vector3 standingScale = new Vector3(1,1,1); //escala de pie (para el collider)
-    private Vector3 standingCameraOffset = new Vector3(0,0.8f,0.3f); //offset de la cámara de pie (posición aproximada de la cabeza)
+    private Vector3 standingScale = new Vector3(0.8f,0.8f,0.8f); //escala de pie (para el collider)
+    private float standingHeadHeight = 1.1f; //altura de la cabeza respecto al cuerpo de pie
 
-    private Vector3 crouchedScale = new Vector3(1, 0.6f, 1); //escala agachado (para el collider)
-    private Vector3 crouchedCameraOffset = new Vector3(0, 0.48f, 0.3f); //offset de la cámara agachado (posición aproximada de la cabeza)
+    private Vector3 crouchedScale = new Vector3(0.8f, 0.55f, 0.8f); //escala agachado (para el collider)
+    private float crouchedHeadHeight = 0.85f; //altura de la cabeza respecto al cuerpo agachado
+
+    private Vector3 headMovement; //movimiento de la cabeza respecto al cuerpo del jugador (no lo hacemos hijo por temas del collider al agacharse)
 
 
     void Start()
@@ -44,11 +48,27 @@ public class PlayerController : NetworkBehaviour
         {
             transform.parent.GetComponent<PlayerInput>().enabled = true;
             cinemachineCamera = GameObject.Find("CinemachineCamera").GetComponent<CinemachineCamera>();
-            cinemachineCamera.Follow = transform;
+            cinemachineCamera.Follow = playerHead.transform;
+
+            //deactivamos los mesh renderer nuestros para que la cámara no vea nuestro cuerpo (pero el de los demás si)
+            transform.GetComponent<MeshRenderer>().enabled = false;
+            playerHead.transform.GetComponent<MeshRenderer>().enabled = false;
         }
+
+        headMovement = new Vector3(currentTransform.position.x, currentTransform.position.y + standingHeadHeight, currentTransform.position.z);
     }
     void Update()
     {
+        if (crouched)
+        {
+            headMovement = new Vector3(currentTransform.position.x, currentTransform.position.y + crouchedHeadHeight, currentTransform.position.z);
+
+        }
+        else
+        {
+            headMovement = new Vector3(currentTransform.position.x, currentTransform.position.y + standingHeadHeight, currentTransform.position.z);
+        }
+        playerHead.transform.position = headMovement;
     }
 
     public void FixedUpdate()
@@ -79,20 +99,19 @@ public class PlayerController : NetworkBehaviour
 
         velocityX.y = rb.velocity.y;
         rb.velocity = velocityX;
+        
     }
     #endregion
 
     #region ONMOUSE
     private void UpdateMouseLook()
     {
-        if (IsOwner)
-        {
-            Vector2 rotation = cinemachineCamera.transform.localEulerAngles;
+        Vector2 rotation = playerHead.transform.localEulerAngles;
             if (horM != 0)
             {
                 currentTransform.Rotate(0.0f, horM * (sensibility * 100) * Time.deltaTime, 0.0f);
                 rotation.y = currentTransform.rotation.eulerAngles.y;
-            }
+        }
             if (verM != 0)
             {
                 rotation.x = (rotation.x - verM * (sensibility * 100) * Time.deltaTime + 360) % 360;
@@ -105,8 +124,7 @@ public class PlayerController : NetworkBehaviour
                     rotation.x = 280;
                 }
             }
-            cinemachineCamera.transform.localEulerAngles = rotation;
-        }
+         playerHead.transform.localEulerAngles = rotation;
     }
 
     #endregion
@@ -151,15 +169,11 @@ public class PlayerController : NetworkBehaviour
     [ServerRpc]
     public void EnterCrouchServerRpc()
     {
-        //if (!jumping)
-        //{
         crouched = true;
         //aqui cambiamos la escala de la capsula (principalmente para que el collider se haga más bajo),
         //cuando tengamos modelos no deberia ser así a no ser que el modelo y el objeto jugador se manejen por separado
         transform.localScale = crouchedScale;
-        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.4f, transform.localPosition.z);
-        cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = crouchedCameraOffset;
-        //}   
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y - 0.25f, transform.localPosition.z);
     }
 
     [ServerRpc]
@@ -168,8 +182,7 @@ public class PlayerController : NetworkBehaviour
         crouched = false;
         //volvemos a cambiar la escala
         transform.localScale = standingScale;
-        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + 0.4f, transform.localPosition.z);
-        cinemachineCamera.GetComponent<CinemachineFollow>().FollowOffset = standingCameraOffset;
+        transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y + 0.25f, transform.localPosition.z);
     }
     #endregion
 }
