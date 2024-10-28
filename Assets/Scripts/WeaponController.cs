@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
 using Unity.Cinemachine;
+using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
 
 
 public class WeaponController : NetworkBehaviour
@@ -71,13 +72,13 @@ public class WeaponController : NetworkBehaviour
             {
                 thisWeapon.cinemachineCamera.Lens.FieldOfView = zoom;
                 UIReference.sprite = zoomCrosshair;
-                AdjustRectTransformToSprite(zoomCrosshair);
+                AjustarMira();
             }
             else
             {
                 thisWeapon.cinemachineCamera.Lens.FieldOfView = defaultZoom;
                 UIReference.sprite = crosshair;
-                AdjustRectTransformToSprite(crosshair);
+                AjustarMira();
             }
         }
         if (holdOption)
@@ -108,23 +109,19 @@ public class WeaponController : NetworkBehaviour
     {
         thisWeapon.reduccionDeDesvio = a;
     }
-
-
-    private void AdjustRectTransformToSprite(Sprite sprite)
+    private void AjustarMira()
     {
-       RectTransform rt = UIReference.GetComponent<RectTransform>();
-       rt.sizeDelta = new Vector2(sprite.rect.width, sprite.rect.height);
-
-        /*
-        RectTransform rt = UIReference.GetComponent<RectTransform>();
-
-        // Obtener el tamaño de la pantalla
-        float screenWidth = Screen.width;
-        float screenHeight = Screen.height;
-
-        // Ajustar el tamaño del RectTransform para que coincida con el tamaño de la pantalla
-        rt.sizeDelta = new Vector2(screenWidth, screenHeight);
-        */
+       if(UIReference.sprite.rect.size.x > 32 && UIReference.sprite.rect.size.y > 32)
+       {
+            UIReference.GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+            UIReference.preserveAspect = false;
+        }
+        else
+        {
+            UIReference.GetComponent<RectTransform>().localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            UIReference.preserveAspect = true;
+        }
+       
     }
 
 

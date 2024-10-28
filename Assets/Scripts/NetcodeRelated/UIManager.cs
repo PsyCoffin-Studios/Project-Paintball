@@ -121,7 +121,7 @@ namespace HelloWorld
 
                 canvasUI.SetActive(false);
                 canvasInGame.SetActive(true);
-                canvasInGame.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text
+                canvasInGame.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text
                     = "PROTOTYPE VERSION\r\nROOM CODE: " + joinCode;
             }
             catch (RelayServiceException e)
@@ -148,7 +148,7 @@ namespace HelloWorld
 
                 canvasUI.SetActive(false);
                 canvasInGame.SetActive(true);
-                canvasInGame.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text
+                canvasInGame.transform.GetChild(4).GetComponent<TextMeshProUGUI>().text
                     = "PROTOTIPE VERSION\r\nROOM CODE: "+joinCode;
             }
             catch (RelayServiceException e)
