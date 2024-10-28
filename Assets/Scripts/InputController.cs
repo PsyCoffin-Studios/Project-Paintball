@@ -4,21 +4,49 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 using Unity.Cinemachine;
+using UnityEngine.Windows;
+using Unity.Burst.Intrinsics;
 
 public class InputController : NetworkBehaviour
 {
-    [SerializeField] private PlayerController body;
-    
+    [SerializeField] protected PlayerController body;
+    [SerializeField] protected WeaponController gun;
 
-    void Start()
+
+    [SerializeField] private InputActionAsset inputActions;
+    private InputActionMap playerActionMap;
+    private InputActionMap uiActionMap;
+
+
+    void Awake()
     {
-        //body = transform.GetChild(0).GetComponent<PlayerController>();
+        inputActions = GetComponent<PlayerInput>().actions;
+        playerActionMap = inputActions.FindActionMap("Player");
+        uiActionMap = inputActions.FindActionMap("UI");
+
+        EnablePlayerControls();
+    }
+
+    public void EnablePlayerControls()
+    {
+        uiActionMap.Disable();
+        playerActionMap.Enable();
+    }
+
+    public void EnableUIControls()
+    {
+        playerActionMap.Disable();
+        uiActionMap.Enable();
+    }
+
+    public void SetGun(WeaponController g)
+    {
+        gun = g;
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -34,6 +62,8 @@ public class InputController : NetworkBehaviour
         }
     }
 
+    
+
     public void OnMouseX(InputAction.CallbackContext context){
         OnMouseXServerRpc(context.ReadValue<float>());
     }
@@ -45,6 +75,7 @@ public class InputController : NetworkBehaviour
     [ServerRpc]
     public void OnMouseXServerRpc(float input)
     {
+        //Debug.Log(input);
         body.horM = input;
     }
 
@@ -59,10 +90,12 @@ public class InputController : NetworkBehaviour
         if (context.performed)
         {
             body.EnterCrouch();
+            gun.ChangeReduction(gun.crouchReduction);
         }
         else if (context.canceled)
         {
             body.ExitCrouch();
+            gun.ChangeReduction(gun.defaultReduction);
         }
     }
 
@@ -74,16 +107,69 @@ public class InputController : NetworkBehaviour
         body.ver = input.y;
     }
 
-    [ServerRpc]
-    public void OnJumpServerRpc()
+
+    public void OnShoot(InputAction.CallbackContext context)
     {
+        if (gun.holdOption)
+        {
+            if (context.performed)
+            {
+                gun.holding = true;
+            }
+            if (context.canceled){
+                gun.holding = false;
+            }
+        }
+        else {
+            if (context.performed)
+            {
+                gun.ShootBullet();
+            }
+        }
+        
+    }
+
+    public void OnZoom(InputAction.CallbackContext context)
+    {
+        if (gun.zoomOption)
+        {
+            if (context.performed)
+            {
+                gun.ChangeReduction(gun.zoomReduction);
+                gun.zooming = true;
+            }
+            else if (context.canceled)
+            {
+                gun.ChangeReduction(gun.defaultReduction);
+                gun.zooming = false;
+            }
+        }
 
     }
 
-
-    [ServerRpc]
-    public void OnCrouchServerRpc()
+    public void OnPause(InputAction.CallbackContext context)
     {
 
+        if (context.performed)
+        {
+            GameObject.Find("@UIManager").GetComponent<UIControllerInGame>().AbrirOpciones(gameObject);
+        }
     }
+
+    public void OnQuitPause(InputAction.CallbackContext context)
+    {
+
+        if (context.performed)
+        {
+            GameObject.Find("@UIManager").GetComponent<UIControllerInGame>().CerrarOpciones();
+        }
+    }
+
+
+    public void OnHabilidad(InputAction.CallbackContext context)
+    {
+        body.UsarHabilidad();
+    }
+
+
 }

@@ -5,8 +5,9 @@ using UnityEngine;
 public class PlayerFeet : MonoBehaviour
 {
     PlayerController playerController;
+    [SerializeField] private LayerMask groundLayer;
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         playerController = transform.parent.GetComponent<PlayerController>();
     }
@@ -14,23 +15,24 @@ public class PlayerFeet : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        CheckGroundStatus();
     }
 
-    //comprobar si el jugador está en el suelo para saltar
-    void OnTriggerEnter(Collider collision)
+    void CheckGroundStatus()
     {
-        if (collision.gameObject.CompareTag("Suelo"))
+
+        RaycastHit hit;
+        Ray landingRay = new Ray(transform.position, Vector3.down);
+        Debug.DrawRay(transform.position, Vector3.down * 0.5f);
+
+        if (Physics.Raycast(landingRay, out hit, 0.5f, groundLayer))
         {
             playerController.SetJumping(false);
         }
-    }
-    //comprobar que el jugador ha saltado o está cayendo de alguna superficie para no poder saltar en el aire
-    void OnTriggerExit(Collider collision)
-    {
-        if (collision.gameObject.CompareTag("Suelo"))
+        else
         {
             playerController.SetJumping(true);
         }
     }
+
 }
