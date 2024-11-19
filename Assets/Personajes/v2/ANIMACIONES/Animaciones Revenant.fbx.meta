@@ -3,7 +3,37 @@ guid: 389b318f04f7baa45997104ca14fbb10
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Bolsillos base
+    second: {fileID: 2100000, guid: aef877227099a5547b2551d5a21113e1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cabeza Revenant Glow base
+    second: {fileID: 2100000, guid: 2d1351f9368507d42a5896ff55a587e0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Capucha revenant base
+    second: {fileID: 2100000, guid: efe0dcbd4fc4d1143805d623862017e7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Chaleco revenant  base
+    second: {fileID: 2100000, guid: 5f1043c6245837a42bf131865f0331bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cintas base
+    second: {fileID: 2100000, guid: f484440b70904b94985641551edd6055, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cuerpo Revenant base
+    second: {fileID: 2100000, guid: c66a33f3ee273454681dadd6cc23bb69, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
