@@ -9,12 +9,16 @@ using UnityEngine.UI;
 
 public class UIControllerInGame : MonoBehaviour
 {
+    [Header("\nDirtyFlag para los resultados\n")]
+
+    public bool victoria;
 
     [Header("\nVariables de Personaje \n")]
 
     private string arma;
     private string personaje;
     private string habilidad;
+    private PlayerController playerController;
 
     [Header("\nVariables de UIInGame\n")]
 
@@ -22,14 +26,22 @@ public class UIControllerInGame : MonoBehaviour
 
     public Sprite[] listaDeSpritesArmas;
     public Sprite[] listaDeSpritesHabilidades;
+    public Sprite[] listaDeBackgroundsDeCarga;
+    public Sprite[] listaDeBackgroundsFinales;
+
+    public string[] nombresDePersonajes;
     public string[] nombresDeArmas;
     public string[] nombresDeHabilidades;
 
+
     public Dictionary<string, Sprite> armas;
     public Dictionary<string, Sprite> habilidades;
+    public Dictionary<string, Sprite> backgroundCargaPorNombre;
 
     public GameObject armaImage;
     public GameObject habilidadImage;
+    public GameObject backgroundCargaImage;
+    public GameObject backgroundFinalImage;
 
     [Header("\nVariables de Opciones\n")]
 
@@ -42,6 +54,9 @@ public class UIControllerInGame : MonoBehaviour
     public Toggle toggleSFX; 
     public Toggle toggleAmbiente; 
     public Toggle toggleMenu;
+    public Slider sliderSensibilidad;
+    public TextMeshProUGUI numSensibilidad;
+
 
     [Header("\nVariables de Sonido\n")]
 
@@ -68,6 +83,8 @@ public class UIControllerInGame : MonoBehaviour
     {
         armas = new Dictionary<string, Sprite>();
         habilidades = new Dictionary<string, Sprite>();
+        personaje = DataBetweenScenes.instance.GetNombre();
+        victoria = false;
 
         for (int i = 0; i < listaDeSpritesArmas.Length; i++)
         {
@@ -79,9 +96,30 @@ public class UIControllerInGame : MonoBehaviour
             habilidades.Add(nombresDeHabilidades[i], listaDeSpritesHabilidades[i]);
         }
 
+        for (int i = 0; i < listaDeBackgroundsDeCarga.Length; i++)
+        {
+            armas.Add(nombresDePersonajes[i], listaDeBackgroundsDeCarga[i]);
+        }
+
         audioMixer.GetFloat("SFX", out currentSFXVolume);
         audioMixer.GetFloat("Ambiente", out currentAmbienteVolume);
         audioMixer.GetFloat("Menu", out currentMenuVolume);
+
+        // Configuración inicial del Slider
+        if (sliderSensibilidad != null)
+        {
+            sliderSensibilidad.minValue = 0.1f;
+            sliderSensibilidad.maxValue = 2.0f;
+            sliderSensibilidad.value = 0.6f; // Valor por defecto
+            sliderSensibilidad.onValueChanged.AddListener(ActualizarSensibilidad);
+
+            // Mostrar el valor inicial
+            numSensibilidad.text = sliderSensibilidad.value.ToString("F1");
+        }
+
+        //Configuracion del background de carga
+        backgroundCargaImage.GetComponent<Image>().sprite = ObtenerSpritePorNombre(personaje);
+
     }
 
     private void ActualizarUI()
@@ -109,7 +147,7 @@ public class UIControllerInGame : MonoBehaviour
     {
         if (armas.ContainsKey(nombre))
         {
-            Debug.LogWarning($"buscando el arma {arma}");
+            //Debug.LogWarning($"buscando el arma {arma}");
             return armas[nombre];  // Devuelve el sprite correspondiente al nombre del arma
 
         }
@@ -117,13 +155,28 @@ public class UIControllerInGame : MonoBehaviour
         {
             return habilidades[nombre];
         }
+        else if (backgroundCargaPorNombre.ContainsKey(nombre))
+        {
+            return backgroundCargaPorNombre[nombre];
+        }
         else
         {
-            Debug.LogWarning("El nombre del arma o la habilidad no existe: " + nombre);
+            Debug.LogWarning("El nombre del arma, la habilidad o el fondo no existe: " + nombre);
             return null;
         }
     }
 
+    public void actualizarPantallaFinal()
+    {
+        if (victoria) {
+
+            backgroundFinalImage.GetComponent <Image>().sprite = listaDeBackgroundsFinales[0];
+        }
+        else
+        {
+            backgroundFinalImage.GetComponent<Image>().sprite = listaDeBackgroundsFinales[0];
+        }
+    }
     #endregion
 
     #region Logica de las opciones
@@ -321,6 +374,23 @@ public class UIControllerInGame : MonoBehaviour
             audioMixer.SetFloat("Menu", MIN_VOLUME_DB);
         }
         UpdateVolumeDisplay("Menu");
+    }
+
+    public void ActualizarSensibilidad(float nuevaSensibilidad)
+    {
+        if (playerController == null)
+        {
+            // Encuentra al jugador principal si no está asignado
+            playerController = FindObjectOfType<PlayerController>();
+        }
+
+        if (playerController != null)
+        {
+            playerController.SetSensibility(nuevaSensibilidad); // Cambia la sensibilidad del PlayerController
+        }
+
+        // Actualiza el valor mostrado en la UI
+        numSensibilidad.text = nuevaSensibilidad.ToString("F1");
     }
 
     #endregion

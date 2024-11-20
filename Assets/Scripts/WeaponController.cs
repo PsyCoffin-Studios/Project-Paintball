@@ -66,29 +66,32 @@ public class WeaponController : NetworkBehaviour
     // Update is called once per frame
     public void FixedUpdate()
     {
-        if (zoomOption && IsOwner)
+        if (IsClient&&IsOwner)
         {
-            if (zooming)
+            if (zoomOption)
             {
-                thisWeapon.cinemachineCamera.Lens.FieldOfView = zoom;
-                UIReference.sprite = zoomCrosshair;
-                AjustarMira();
-            }
-            else
-            {
-                thisWeapon.cinemachineCamera.Lens.FieldOfView = defaultZoom;
-                UIReference.sprite = crosshair;
-                AjustarMira();
-            }
-        }
-        if (holdOption)
-        {
-            if (holding)
-            {
-                if (permisoDisparo)
+                if (zooming)
                 {
-                    StartCoroutine(DisparoSeguido());
-                    ShootBullet();
+                    thisWeapon.cinemachineCamera.Lens.FieldOfView = zoom;
+                    UIReference.sprite = zoomCrosshair;
+                    AjustarMira();
+                }
+                else
+                {
+                    thisWeapon.cinemachineCamera.Lens.FieldOfView = defaultZoom;
+                    UIReference.sprite = crosshair;
+                    AjustarMira();
+                }
+            }
+            if (holdOption)
+            {
+                if (holding)
+                {
+                    if (permisoDisparo)
+                    {
+                        StartCoroutine(DisparoSeguido());
+                        ShootBullet();
+                    }
                 }
             }
         }

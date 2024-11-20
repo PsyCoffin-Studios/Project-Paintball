@@ -4,5 +4,6 @@ using UnityEngine;
 
 public interface IHabilidad
 {
-    void Use(PlayerController p);
+    void Use();
+
 }

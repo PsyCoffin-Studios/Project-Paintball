@@ -30,7 +30,6 @@ namespace HelloWorld
 
 
 
-
         async void Start()
         {
             
@@ -172,12 +171,12 @@ namespace HelloWorld
         {
             if (errorText != null)
             {
-                errorText.text = message;  // Actualiza el texto del mensaje de error
-                errorText.gameObject.SetActive(true);  // Asegúrate de que el texto esté visible
+                errorText.text = message;  // Actualiza el textoDebug del mensaje de error
+                errorText.gameObject.SetActive(true);  // Asegúrate de que el textoDebug esté visible
             }
             else
             {
-                Debug.LogWarning("No se ha asignado el componente de texto para los errores.");
+                Debug.LogWarning("No se ha asignado el componente de textoDebug para los errores.");
             }
         }
 

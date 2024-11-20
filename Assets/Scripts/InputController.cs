@@ -11,6 +11,7 @@ public class InputController : NetworkBehaviour
 {
     [SerializeField] protected PlayerController body;
     [SerializeField] protected WeaponController gun;
+    [SerializeField] protected IHabilidad hab;
 
 
     [SerializeField] private InputActionAsset inputActions;
@@ -18,13 +19,16 @@ public class InputController : NetworkBehaviour
     private InputActionMap uiActionMap;
 
 
-    void Awake()
+    public override void OnNetworkSpawn()
     {
-        inputActions = GetComponent<PlayerInput>().actions;
+        if(IsOwner)
+        {inputActions = GetComponent<PlayerInput>().actions;
+        hab = GetComponent<IHabilidad>();
         playerActionMap = inputActions.FindActionMap("Player");
         uiActionMap = inputActions.FindActionMap("UI");
 
-        EnablePlayerControls();
+            EnablePlayerControls();
+        }
     }
 
     public void EnablePlayerControls()
@@ -68,7 +72,6 @@ public class InputController : NetworkBehaviour
         OnMouseXServerRpc(context.ReadValue<float>());
     }
     public void OnMouseY(InputAction.CallbackContext context){
-        
         OnMouseYServerRpc(context.ReadValue<float>());
     }
 
@@ -168,7 +171,11 @@ public class InputController : NetworkBehaviour
 
     public void OnHabilidad(InputAction.CallbackContext context)
     {
-        body.UsarHabilidad();
+        //body.UsarHabilidad();
+        if (context.performed)
+        {
+            hab.Use();
+        }
     }
 
 

@@ -2,33 +2,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
+using TMPro;
 
-public class ExplosionHab : IHabilidad
+public class ExplosionHab : NetworkBehaviour, IHabilidad
 {
-    private bool recargada;
-    private const int TIEMPO_RECARGA = 60;  //segundos para recargar
+    private bool recargadaExplosion = true;
+
+    private const int TIEMPO_RECARGA = 3;  //segundos para recargar
     private const int DURACION_PINTURA = 10;   //segundos que dura el humo
     private const int TIEMPO_DESDE_LANZAMIENTO = 3; //segundos desde que se lanza el bote de humo hasta que explota
     private const int FUERZA_LANZAMIENTO = 20;
 
-    private PlayerController player;
+    public PlayerController player;
 
     private GameObject granada;
     private GameObject pintura;
 
+    [SerializeField] TextMeshProUGUI textoDebug;
+    [SerializeField] Transform origenLanzamiento; 
+
     public ExplosionHab()
     {
-        recargada = true;
-        player = null;
+        //recargadaExplosion = true;
+        //player = null;
     }
 
-    public void Use(PlayerController p)
+    public void Use()
     {
-        player = p;
-        if (recargada)
+        if (recargadaExplosion)
         {
-            recargada = false;
-            UseServerRpc();
+            if (IsOwner)
+            { recargadaExplosion = false; }
+            UseExplosionServerRpc();
+
+
+            player.StartCoroutine(RecargaExplosion());
         }
         else
         {
@@ -38,7 +46,7 @@ public class ExplosionHab : IHabilidad
 
 
     [ServerRpc]
-    public void UseServerRpc()
+    public void UseExplosionServerRpc()
     {
         /* Logica
              *      Aparece prefab de bote de humo
@@ -48,33 +56,20 @@ public class ExplosionHab : IHabilidad
              *      Prefab espera corrutina
              *      Se destruye el prefab
             */
-        if (player.IsServer)
+        if (IsServer)
         {
-            granada = GameObject.Instantiate(player.granadaPrefab, player.transform.position, Quaternion.identity);
-            granada.GetComponent<NetworkObject>().Spawn();
+            granada = GameObject.Instantiate(
+                player.granadaPrefab, origenLanzamiento.position, Quaternion.identity);
 
-            Rigidbody rb = granada.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.AddForce(player.transform.forward * FUERZA_LANZAMIENTO, ForceMode.Impulse);
-            }
-            UseClientRpc();
-
-            player.StartCoroutine(DuracionHabilidad());
-            player.StartCoroutine(Recarga());
-
+            granada.GetComponent<NetworkObject>().Spawn(true);
         }
-    }
-
-    [ClientRpc]
-    public void UseClientRpc()
-    {
-        granada = GameObject.Instantiate(player.granadaPrefab, player.transform.position, Quaternion.identity);
         Rigidbody rb = granada.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(player.transform.forward * FUERZA_LANZAMIENTO, ForceMode.Impulse);
+            rb.AddForce((player.cinemachineCamera.transform.forward + player.transform.up * 0.25f).normalized * FUERZA_LANZAMIENTO, ForceMode.Impulse);
         }
+        player.StartCoroutine(DuracionHabilidad());
+
     }
 
 
@@ -83,64 +78,24 @@ public class ExplosionHab : IHabilidad
         yield return new WaitForSeconds(TIEMPO_DESDE_LANZAMIENTO);
 
         Vector3 direccion = new Vector3(granada.transform.position.x, granada.transform.position.y + 1.5f, granada.transform.position.z);
-        DuracionHabilidad1ServerRpc(direccion);
+        pintura = GameObject.Instantiate(player.pinturaPrefab, direccion, Quaternion.identity);
+        pintura.GetComponent<NetworkObject>().Spawn(true);
+        granada.GetComponent<NetworkObject>().Despawn(true);
 
-        player.StartCoroutine(DuracionHabilidad2());
-
-    }
-
-    IEnumerator DuracionHabilidad2()
-    {
         yield return new WaitForSeconds(DURACION_PINTURA);
-        DuracionHabilidad2ServerRpc();
+        pintura.GetComponent<NetworkObject>().Despawn(true);
+
     }
 
-    [ServerRpc]
-
-    public void DuracionHabilidad1ServerRpc(Vector3 direction)
-    {
-        if (player.IsServer)
-        {
-            pintura = GameObject.Instantiate(player.pinturaPrefab, direction, Quaternion.identity);
-            pintura.GetComponent<NetworkObject>().Spawn();
-
-            GameObject.Destroy(granada);
-            granada.GetComponent<NetworkObject>().Despawn();
-            DuracionHabilidad1ClientRpc(direction);
-        }
-    }
-
-
-    [ClientRpc]
-    public void DuracionHabilidad1ClientRpc(Vector3 direction)
-    {
-        pintura = GameObject.Instantiate(player.pinturaPrefab, direction, Quaternion.identity);
-        GameObject.Destroy(granada);
-    }
-
-    [ServerRpc]
-    public void DuracionHabilidad2ServerRpc()
-    {
-        if (player.IsServer)
-        {
-            GameObject.Destroy(pintura);
-            pintura.GetComponent<NetworkObject>().Despawn();
-            DuracionHabilidad2ClientRpc();
-        }
-    }
-
-
-    [ClientRpc]
-    public void DuracionHabilidad2ClientRpc()
-    {
-        GameObject.Destroy(pintura);
-    }
-
-    IEnumerator Recarga()
+    IEnumerator RecargaExplosion()
     {
         Debug.Log("Habilidad recargando");
+        textoDebug.GetComponent<TextMeshProUGUI>().text = "recargando habilidad...";
         yield return new WaitForSeconds(TIEMPO_RECARGA);
         Debug.Log("Habilidad cargada");
-        recargada = true;
+        recargadaExplosion = true;
+        textoDebug.GetComponent<TextMeshProUGUI>().text = "habilidad lista";
     }
+
+
 }

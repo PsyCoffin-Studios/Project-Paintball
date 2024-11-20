@@ -1,34 +1,45 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.Netcode;
 using UnityEngine;
 
-public class SmokeHab : IHabilidad
+public class SmokeHab : NetworkBehaviour, IHabilidad
 {
-    private bool recargada;
-    private const int TIEMPO_RECARGA = 45;  //segundos para recargar
+    private bool recargadaSmoke = true;
+
+    private const int TIEMPO_RECARGA = 4;//45;  //segundos para recargar
     private const int DURACION_HUMO = 10;   //segundos que dura el humo
     private const int TIEMPO_DESDE_LANZAMIENTO = 2; //segundos desde que se lanza el bote de humo hasta que explota
     private const int FUERZA_LANZAMIENTO = 20;
 
-    private PlayerController player;
+    public PlayerController player;
 
     private GameObject boteHumo;
     private GameObject humo;
 
+
+    [SerializeField] TextMeshProUGUI textoDebug;
+
+    [SerializeField] Transform origenLanzamiento;
+
+    private void Start()
+    { }
+
+
+
     public SmokeHab()
     {
-        recargada = true;
-        player = null;
+        //recargadaSmoke = true;
     }
 
-    public void Use(PlayerController p)
+    public void Use()
     {
-        player = p;
-        if (recargada)
+        if (recargadaSmoke)
         {
-            recargada = false;
-            UseServerRpc();
+            recargadaSmoke = false;
+            UseSmokeServerRpc();
+            player.StartCoroutine(RecargaSmoke());
         }
         else
         {
@@ -37,7 +48,7 @@ public class SmokeHab : IHabilidad
     }
 
     [ServerRpc]
-    public void UseServerRpc()
+    public void UseSmokeServerRpc()
     {
         /* Logica
              *      Aparece prefab de bote de humo
@@ -47,99 +58,50 @@ public class SmokeHab : IHabilidad
              *      Prefab espera corrutina
              *      Se destruye el prefab
             */
-        if (player.IsServer)
+        if (IsServer)
         {
-            boteHumo = GameObject.Instantiate(player.boteHumoPrefab, player.transform.position, Quaternion.identity);
-            boteHumo.GetComponent<NetworkObject>().Spawn();
-            Rigidbody rb = boteHumo.GetComponent<Rigidbody>();
-            if (rb != null)
-            {
-                rb.AddForce(player.transform.forward * FUERZA_LANZAMIENTO, ForceMode.Impulse);
-            }
-            UseClientRpc();
-
-            player.StartCoroutine(DuracionHabilidad());
-            player.StartCoroutine(Recarga());
+            boteHumo = GameObject.Instantiate(
+                player.boteHumoPrefab,
+                origenLanzamiento.position,
+                Quaternion.identity);
+            boteHumo.GetComponent<NetworkObject>().Spawn(true);
         }
-
-        
-    }
-
-    [ClientRpc]
-    public void UseClientRpc()
-    {
-        boteHumo = GameObject.Instantiate(player.boteHumoPrefab, player.transform.position, Quaternion.identity);
         Rigidbody rb = boteHumo.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            rb.AddForce(player.transform.forward * FUERZA_LANZAMIENTO, ForceMode.Impulse);
+            rb.AddForce((player.cinemachineCamera.transform.forward + player.transform.up * 0.25f).normalized * FUERZA_LANZAMIENTO, ForceMode.Impulse);
         }
+        player.StartCoroutine(DuracionHabilidad());
+        
+        
     }
+
 
     IEnumerator DuracionHabilidad()
     {
         yield return new WaitForSeconds(TIEMPO_DESDE_LANZAMIENTO);
 
         Vector3 direccion = new Vector3(boteHumo.transform.position.x, boteHumo.transform.position.y + 1.5f, boteHumo.transform.position.z);
-        DuracionHabilidad1ServerRpc(direccion);
-
-        
-        player.StartCoroutine(DuracionHabilidad2());
-
-    }
-
-    IEnumerator DuracionHabilidad2()
-    {
-        yield return new WaitForSeconds(DURACION_HUMO);
-        DuracionHabilidad2ServerRpc();
-    }
-
-
-    [ServerRpc]
-    public void DuracionHabilidad1ServerRpc(Vector3 direction)
-    {
-        if (player.IsServer)
-        {
-            humo = GameObject.Instantiate(player.esferaHumoPrefab, boteHumo.transform.position, Quaternion.identity);
-            humo.GetComponent<NetworkObject>().Spawn();
-
-            GameObject.Destroy(boteHumo);
-            boteHumo.GetComponent<NetworkObject>().Despawn();
-            DuracionHabilidad1ClientRpc(direction);
-        }
-    }
-
-
-    [ClientRpc]
-    public void DuracionHabilidad1ClientRpc(Vector3 direction)
-    {
         humo = GameObject.Instantiate(player.esferaHumoPrefab, boteHumo.transform.position, Quaternion.identity);
+        humo.GetComponent<NetworkObject>().Spawn(true);
 
-        GameObject.Destroy(boteHumo);
+        boteHumo.GetComponent<NetworkObject>().Despawn(true);
+        yield return new WaitForSeconds(DURACION_HUMO);
+
+        humo.GetComponent<NetworkObject>().Despawn(true);
     }
 
-    [ServerRpc]
-    public void DuracionHabilidad2ServerRpc()
-    {
-        if (player.IsServer)
-        {
-            GameObject.Destroy(humo);
-            humo.GetComponent<NetworkObject>().Despawn();
-            DuracionHabilidad2ClientRpc();
-        }
-    }
 
-    [ClientRpc]
-    public void DuracionHabilidad2ClientRpc()
-    {
-        GameObject.Destroy(humo);
-    }
-
-    IEnumerator Recarga()
+    IEnumerator RecargaSmoke()
     {
         Debug.Log("Habilidad recargando");
+        textoDebug.GetComponent<TextMeshProUGUI>().text = "recargando habilidad...";
         yield return new WaitForSeconds(TIEMPO_RECARGA);
         Debug.Log("Habilidad cargada");
-        recargada = true;
+        recargadaSmoke = true;
+        textoDebug.GetComponent<TextMeshProUGUI>().text = "habilidad lista";
     }
+
+
+
 }

@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Suelo
+  - collider_piernas
+  - collider_cabeza
+  - collider_tronco
   layers:
   - Default
   - TransparentFX
@@ -12,7 +15,7 @@ TagManager:
   - Suelo
   - Water
   - UI
-  - 
+  - PlayerCollider
   - 
   - 
   - 

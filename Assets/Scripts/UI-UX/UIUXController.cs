@@ -14,8 +14,13 @@ public class UIUXController : MonoBehaviour
     public GameObject startButton; // Botón de "Iniciar Partida"
     public GameObject creditsButton; // Botón de "Créditos"
 
+    public GameObject nextButton;
+    public GameObject reiButton;
+
     public GameObject botonesPersonajes;
+    public GameObject botonesCreditos;
     public GameObject botonInicio;
+    public GameObject botonesPistola;
 
     public void Start()
     {
@@ -24,7 +29,7 @@ public class UIUXController : MonoBehaviour
 
     }
 
-    public void SeleccionPersonaje()
+    public void seleccionPersonaje()
     {
 
         // Ocultar los botones de Iniciar Partida y Créditos
@@ -39,15 +44,35 @@ public class UIUXController : MonoBehaviour
         audioManagerUI.StopMusic();
     }
 
-    public void PantallaCreditos()
+    public void pantallaCreditos()
     {
-        //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + _______);
+        // Ocultar los botones de Iniciar Partida y Créditos
+        startButton.SetActive(false);
+        creditsButton.SetActive(false);
 
-        throw new NotImplementedException();
+        // Mostrar el primer boton de los creditos y su canvas
+        backGroundManager.startCreditos();
+        botonesCreditos.SetActive(true);
+
+        //Parar la música de inicio
+        audioManagerUI.StopMusic();
     }
 
-    public void IniciarPartida()
+    public void cambiarCreditos()
     {
+        nextButton.SetActive(false);
+        reiButton.SetActive(true);
+        
+        backGroundManager.cambiarCreditos();
+    }
+
+    public void iniciarPartida()
+    {
+        // Configurar el arma seleccionada
+        string armaSeleccionada = backGroundManager.ObtenerArmaSeleccionada();
+        DataBetweenScenes.instance.SetArma(armaSeleccionada);
+
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
     }
 
@@ -55,6 +80,7 @@ public class UIUXController : MonoBehaviour
     {
         string nombreBoton = button.name; // Obtener el nombre del botón clicado
         int seleccionPersonaje = 0; // Valor por defecto
+        botonesPistola.SetActive(true);
 
         // Asignar un valor basado en el nombre del botón
         switch (nombreBoton)
@@ -63,7 +89,6 @@ public class UIUXController : MonoBehaviour
                 seleccionPersonaje = 1;
 
                 DataBetweenScenes.instance.SetNombre("Joker");
-                DataBetweenScenes.instance.SetArma("Rifle");
                 DataBetweenScenes.instance.SetHabilidad("Explosiones");
 
                 break;
@@ -71,7 +96,6 @@ public class UIUXController : MonoBehaviour
                 seleccionPersonaje = 2;
 
                 DataBetweenScenes.instance.SetNombre("Outcast");
-                DataBetweenScenes.instance.SetArma("Francotirador");
                 DataBetweenScenes.instance.SetHabilidad("BombasDeHumo");
 
                 break;
@@ -79,7 +103,6 @@ public class UIUXController : MonoBehaviour
                 seleccionPersonaje = 3;
 
                 DataBetweenScenes.instance.SetNombre("Revenant");
-                DataBetweenScenes.instance.SetArma("Escopeta");
                 DataBetweenScenes.instance.SetHabilidad("Invisibilidad");
 
                 break;
@@ -87,7 +110,6 @@ public class UIUXController : MonoBehaviour
                 seleccionPersonaje = 4;
 
                 DataBetweenScenes.instance.SetNombre("Hex");
-                DataBetweenScenes.instance.SetArma("Pistola");
                 DataBetweenScenes.instance.SetHabilidad("Dash");
 
                 break;
@@ -96,10 +118,17 @@ public class UIUXController : MonoBehaviour
                 break;
         }
 
-
         backGroundManager.updatePlayerSelection(seleccionPersonaje);
         audioManagerUI.playChooseDialog(seleccionPersonaje);
 
         if (!botonInicio.active) { botonInicio.SetActive(true); }
     }
+
+
+    public void volverInicio()
+    {
+        // Recarga la escena actual
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+ 
 }

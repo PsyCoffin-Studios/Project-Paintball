@@ -29,7 +29,6 @@ public class MobileInputController : InputController
 
     public void OnHabilidadMobile()
     {
-        body.UsarHabilidad();
     }
 
     public void OnCrouchMobile()

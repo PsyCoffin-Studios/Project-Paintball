@@ -4,17 +4,21 @@ using UnityEngine;
 
 public class PlayerFeet : MonoBehaviour
 {
-    PlayerController playerController;
+    [SerializeField] PlayerController playerController;
     [SerializeField] private LayerMask groundLayer;
+    private Quaternion initialRotation;
     // Start is called before the first frame update
     void Awake()
     {
-        playerController = transform.parent.GetComponent<PlayerController>();
+        //initialRotation = transform.rotation;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Mantener la rotación fija en cada frame porque en la animación de muerte el rayo también "se vuelta" como el propio personaje
+        //transform.rotation = initialRotation;
+
         CheckGroundStatus();
     }
 

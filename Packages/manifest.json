@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.hwaet.projectcloner": "file:../Assets/Packages/UnityProjectCloner-master",
     "com.unity.animation.rigging": "1.3.0",
     "com.unity.burst": "1.8.13",
     "com.unity.cinemachine": "3.1.1",
