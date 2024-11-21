@@ -3,7 +3,42 @@ guid: ed98b1b20d11a4c478c3877d924e7274
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cabeza Joker
+    second: {fileID: 2100000, guid: 7c1ce3268dd1090459c56a59b388314b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Chaleco
+    second: {fileID: 2100000, guid: 8ce68941ef8866041b71c5ebf7db7a4e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cintas
+    second: {fileID: 2100000, guid: ef6ea620cf1e4c9409435597c1a4a631, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cuello camisa
+    second: {fileID: 2100000, guid: 74ad92abeb88bae408d017542fb00051, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cuerpo Joker Base
+    second: {fileID: 2100000, guid: 85c8b40f3b7ae0549bd643edcc9ba2bd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: "M\xE1scara"
+    second: {fileID: 2100000, guid: 3489d84e918a56642a8e17fc0d2b98b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Pelo
+    second: {fileID: 2100000, guid: 57c3de23800d4fa4294aeb3042563ac6, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

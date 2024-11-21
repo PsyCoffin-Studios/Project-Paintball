@@ -20,6 +20,7 @@ public class BackGroundManager : MonoBehaviour {
     public GameObject armaImage;
 
     private int currentArmaIndex = 0; // Índice actual del arma seleccionada
+    [SerializeField] private GameObject[] personajesUI;
 
     public void Start()
     {
@@ -88,6 +89,16 @@ public class BackGroundManager : MonoBehaviour {
     public void updatePlayerSelection(int idx)
     {
         panelBackground.sprite = selectionBackgrounds[idx];
+    }
+
+    public void ChangeActivePlayer(int idx)
+    {
+        foreach(GameObject personajes in personajesUI)
+        {
+            personajes.SetActive(false);
+        }
+
+        personajesUI[idx].SetActive(true);
     }
 
     public void cambiarArmaHaciaDerecha()

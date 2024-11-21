@@ -3,7 +3,32 @@ guid: 19ce22a381ffbf94d8b1d3066fcbe4ce
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Accesorios Outlaw
+    second: {fileID: 2100000, guid: 5eda52f2c85fb1047a319aa788bfde0f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Cabeza outlaw
+    second: {fileID: 2100000, guid: 8592688b57e93c7428382134fcdd60c1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Chaleco outlaw base
+    second: {fileID: 2100000, guid: 28872ba39aff91a429a645adcccd9d8d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: "M\xE1scara y sombrero"
+    second: {fileID: 2100000, guid: e91a9b44e084c4a4280804f8e00eb5c3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Outlaw cuerpo base
+    second: {fileID: 2100000, guid: 25fda1dcf5846cd4fa99cc2fa9338888, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

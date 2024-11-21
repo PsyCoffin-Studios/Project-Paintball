@@ -119,6 +119,7 @@ public class UIUXController : MonoBehaviour
         }
 
         backGroundManager.updatePlayerSelection(seleccionPersonaje);
+        backGroundManager.ChangeActivePlayer(seleccionPersonaje - 1);
         audioManagerUI.playChooseDialog(seleccionPersonaje);
 
         if (!botonInicio.active) { botonInicio.SetActive(true); }
